@@ -25,6 +25,7 @@ pub fn get_router() -> Router {
     Router::new()
         .route("/", get(index))
         .route("/test", get(test))
+        .route("/is_alive", get(is_alive))
 }
 
 #[utoipa::path(
@@ -53,4 +54,17 @@ pub async fn index() -> Redirect {
 pub async fn test() -> Html<&'static str> {
     info!("Handling request.");
     Html("<p>백엔드에서 받은 응답!</p>")
+}
+
+#[utoipa::path(
+    get,
+    tag = "index",
+    path = "/is_alive",
+    responses(
+        (status = 200, body = String, description = "HTML response")
+    )
+)]
+pub async fn is_alive() -> Html<&'static str> {
+    info!("Server live test.");
+    Html("<h1>Server is alive!</h1>")
 }
