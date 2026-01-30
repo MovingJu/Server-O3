@@ -14,7 +14,7 @@ COPY ./Cargo.toml ./Cargo.lock ./
 RUN cargo fetch
 
 COPY ./src ./src
-RUN cargo build --release
+RUN cargo build --release -j
 
 FROM alpine:3.23
 WORKDIR /app
