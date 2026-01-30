@@ -26,6 +26,8 @@ jobs:
             cd /home/${{ secrets.AWS_EC2_USER }}/api.movingju.com/Server-O3 && 
             git fetch --all
             git reset --hard origin/main
+            docker system prune -af
+            docker volume prune -f
             docker compose build server-o3
             docker compose up -d server-o3
           "
