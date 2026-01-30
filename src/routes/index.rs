@@ -11,7 +11,7 @@ use log::info;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(index, test),
+    paths(index, test, is_alive),
     tags((
         name = "index",
         description = "APIs that is on index."
