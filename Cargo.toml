@@ -3,6 +3,10 @@ name = "Server-O3"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "Server-O3"
+path = "src/main.rs"
+
 [dependencies]
 # Async Runtime
 tokio = { version = "1.36.0", features = ["full"] }
