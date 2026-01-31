@@ -19,6 +19,6 @@ RUN cargo build --release
 FROM alpine:3.23
 WORKDIR /app
 
-COPY --from=compile_time /app/target/release/Server-O3 ./
+COPY --from=compile_time /app/target/release/api_movingju_com ./
 
-CMD ["./Server-O3"]
+CMD ["./api_movingju_com"]

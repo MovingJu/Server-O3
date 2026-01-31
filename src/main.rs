@@ -9,9 +9,9 @@ mod routes;
 #[derive(OpenApi)]
 #[openapi(
     info(
-        title = "PostgreSQL API",
+        title = "movingju.com API",
         version = "1.0.0",
-        description = "Testing Postgres DataBase crate."
+        description = "My Public APIs"
     ),
     nest(
         (path = "/users", api = routes::users::UsersApi)

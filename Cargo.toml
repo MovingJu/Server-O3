@@ -1,10 +1,10 @@
 [package]
-name = "Server-O3"
+name = "api_movingju_com"
 version = "0.1.0"
 edition = "2024"
 
 [[bin]]
-name = "Server-O3"
+name = "api_movingju_com"
 path = "src/main.rs"
 
 [dependencies]
