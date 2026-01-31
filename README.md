@@ -1,7 +1,7 @@
-# Server-O3
+# api.movingju.com
 
-Server targets on speed.
+My public api
 
-## Current Goal
+## API Reference
 
-- Studying about async-rust, postgresql and Github CI/CD.
+[Reference](https://api.movingju.com)
