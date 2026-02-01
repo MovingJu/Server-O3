@@ -73,9 +73,9 @@ pub struct FiboQuery {
 )]
 pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiResponse>> {
     let mut res_default = ApiResponse::<HanoiResponse>::default();
-    info!("user requests hanoi {}'th squence", query.num_cell);
-    if query.num_cell < 15 {
-        res_default = match hanoi::calc_hanoi_rec(query.num_cell).await {
+    info!("user requests hanoi {}'th squence", query.n);
+    if query.n < 15 {
+        res_default = match hanoi::calc_hanoi_rec(query.n).await {
             Ok(res) => res_default
                 .code(0)
                 .resp("ok".to_string())
@@ -90,8 +90,8 @@ pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiRes
                     .resp("Thread join Error occur!".to_string())
             }
         };
-    } else if query.num_cell < 10_000_000 {
-        let num_replacement = hanoi::calc_hanoi_num(query.num_cell).await;
+    } else if query.n < 10_000_000 {
+        let num_replacement = hanoi::calc_hanoi_num(query.n).await;
         res_default = match num_replacement {
             Ok(v) => res_default
                 .code(1)
@@ -116,7 +116,7 @@ pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiRes
 }
 #[derive(Deserialize, ToSchema, IntoParams)]
 pub struct HanoiQuery {
-    num_cell: usize,
+    n: usize,
 }
 #[derive(Serialize, ToSchema, Default)]
 pub struct HanoiResponse {
