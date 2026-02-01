@@ -31,7 +31,7 @@ async fn main() -> Result<()> {
     };
     debug!("Complete to load DATABASE_URL");
     let pool = PgPool::connect(&database_url).await?;
-    let state = std::sync::Arc::new(services::sql_pool::AppState { pool });
+    let state = std::sync::Arc::new(repository::RepoFactory::new(pool));
     debug!("Succesfully connect to Database");
 
     // Build application with all routes

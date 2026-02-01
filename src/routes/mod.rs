@@ -7,7 +7,7 @@ pub mod apis {
     use axum::Router;
     use utoipa::OpenApi;
     
-    use crate::services::sql_pool::AppState;
+    use crate::{repository::RepoFactory, services::sql_pool::AppState};
     use super::*;
 
     #[derive(OpenApi)]
@@ -25,7 +25,7 @@ pub mod apis {
     )]
     pub struct ApiDoc;
 
-    pub fn get_router(state: std::sync::Arc<AppState>) -> Router {
+    pub fn get_router(state: std::sync::Arc<RepoFactory>) -> Router {
         Router::new()
             .merge(users::get_router())
             .merge(calc::get_router())
