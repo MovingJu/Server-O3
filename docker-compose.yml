@@ -1,7 +1,0 @@
-services:
-  server-o3:
-    build: "./"
-    image: "movingju/public:server-o3"
-    container_name: "Server_O3"
-    ports:
-      - "8080:8080"

@@ -12,12 +12,13 @@ mod services;
 #[openapi(
     info(
         title = "movingju.com API",
-        version = "1.0.0",
+        version = "1.1.0",
         description = "My Public APIs"
     ),
     nest(
         (path = "/users", api = routes::users::UsersApi),
-        (path = "/calc", api = routes::calc::CalcApi)
+        (path = "/calc", api = routes::calc::CalcApi),
+        (path = "/db", api = routes::database::DatabaseApi)
     )
 )]
 struct ApiDoc;
@@ -36,7 +37,8 @@ async fn main() -> Result<()> {
         .merge(SwaggerUi::new("/docs").url("/openapi.json", openapi))
         .merge(routes::index::get_router())
         .merge(routes::users::get_router())
-        .merge(routes::calc::get_router());
+        .merge(routes::calc::get_router())
+        .merge(routes::database::get_router());
 
     let listener = tokio::net::TcpListener::bind(&"0.0.0.0:8080").await?;
 

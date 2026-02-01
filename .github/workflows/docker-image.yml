@@ -23,10 +23,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Build Docker image
-        run: docker compose build
+        run: docker build -t movingju/public:api.movingju.com .
           
       - name: Push Docker image
-        run: docker compose push
+        run: docker push movingju/public:api.movingju.com
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0
@@ -39,6 +39,6 @@ jobs:
             cd /home/${{ secrets.AWS_EC2_USER }}/api.movingju.com/Server-O3 && 
             git fetch --all
             git reset --hard origin/main
-            docker compose pull server-o3
-            docker compose up -d server-o3
+            docker pull movingju/public:api.movingju.com
+            docker run -p 8080:8080 -d movingju/public:api.movingju.com
           "
