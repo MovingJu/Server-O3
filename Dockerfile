@@ -1,6 +1,8 @@
 FROM rust:alpine3.23 AS compile_time
 RUN apk add --no-cache \
     openssl-dev \
+    perl \
+    make \
     pkgconfig \
     musl-dev \
     git \
