@@ -1,10 +1,12 @@
+use anyhow::Result;
 use axum::Router;
+use log::info;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
-use anyhow::Result;
-use log::info;
 
+mod prelude;
 mod routes;
+mod services;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -14,7 +16,8 @@ mod routes;
         description = "My Public APIs"
     ),
     nest(
-        (path = "/users", api = routes::users::UsersApi)
+        (path = "/users", api = routes::users::UsersApi),
+        (path = "/calc", api = routes::calc::CalcApi)
     )
 )]
 struct ApiDoc;
@@ -27,12 +30,13 @@ async fn main() -> Result<()> {
     // Merge all OpenAPI documents
     let mut openapi = ApiDoc::openapi();
     openapi.merge(routes::index::IndexApi::openapi());
-    
+
     // Build application with all routes
     let app = Router::new()
         .merge(SwaggerUi::new("/docs").url("/openapi.json", openapi))
         .merge(routes::index::get_router())
-        .merge(routes::users::get_router());
+        .merge(routes::users::get_router())
+        .merge(routes::calc::get_router());
 
     let listener = tokio::net::TcpListener::bind(&"0.0.0.0:8080").await?;
 

@@ -10,7 +10,8 @@ path = "src/main.rs"
 [dependencies]
 # Async Runtime
 tokio = { version = "1.36.0", features = ["full"] }
-tokio-util = { version = "0.7.16", features = ["io"] }
+# tokio-util = { version = "0.7.16", features = ["io"] }
+
 # Async Server
 axum = "0.7.4"
 serde = {version = "1.0.196", features = ["derive"]}
@@ -18,10 +19,16 @@ serde_json = "1.0.145"
 utoipa = {version = "5", features = ["axum_extras", "openapi_extensions"]}
 utoipa-swagger-ui = { version = "8", features = ["axum"] }
 sqlx = { version = "0.8", features = [ "runtime-tokio-native-tls", "postgres" ] }
+
 # Logging & Reading env files
 dotenv = "0.15"
 env_logger = "0.11.8"
 log = "0.4.28"
+
 # Error handling
 thiserror = "1.0"
 anyhow = "1"
+num-bigint = "0.4.6"
+
+# Safe mutable static variable
+lazy_static = "1.5.0"
