@@ -36,9 +36,7 @@ jobs:
       - name: CD on EC2
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.AWS_EC2_USER }}@${{ secrets.AWS_EC2_HOST }} "
-            cd /home/${{ secrets.AWS_EC2_USER }}/api.movingju.com/Server-O3 && 
-            git fetch --all
-            git reset --hard origin/main
-            docker pull movingju/public:api.movingju.com
-            docker run -p 8080:8080 -d movingju/public:api.movingju.com
+            cd /home/ubuntu/
+            docker compose pull api.movingju.com
+            docker compose up -d api.movingju.com
           "
