@@ -1,13 +1,11 @@
-use utoipa::OpenApi;
+use crate::prelude::*;
 use axum::{
-    Router,
-    response::Redirect,
+    Json, Router,
+    response::{Html, Redirect},
     routing::get,
-    response::Html
 };
 use log::info;
-
-// routes/users.rs
+use utoipa::OpenApi;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -61,10 +59,14 @@ pub async fn test() -> Html<&'static str> {
     tag = "index",
     path = "/is_alive",
     responses(
-        (status = 200, body = String, description = "HTML response")
+        (status = 200, body = ApiResponse<String>, description = "JSON response")
     )
 )]
-pub async fn is_alive() -> Html<&'static str> {
+pub async fn is_alive() -> Json<ApiResponse<String>> {
     info!("Server live test.");
-    Html("<h1>Server is alive!</h1>")
+    Json(ApiResponse {
+        code: 200,
+        resp: "ok".to_string(),
+        data: "Server is alive!".to_string(),
+    })
 }
