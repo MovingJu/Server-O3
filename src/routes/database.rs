@@ -2,7 +2,7 @@
 //! module testing my database
 
 use axum::{Json, routing::get, Router, extract::Query};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize};
 use utoipa::{OpenApi, ToSchema, IntoParams};
 
 use crate::prelude::*;
