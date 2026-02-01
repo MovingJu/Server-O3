@@ -1,10 +1,12 @@
 use axum::{Json, Router, extract::Query, routing::get};
 use log::{error, info};
-use num::{BigUint, pow::pow};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, OpenApi, ToSchema};
 
-use crate::prelude::*;
+use crate::{
+    prelude::*,
+    services::{fibo, hanoi},
+};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -47,7 +49,7 @@ pub async fn fibo(Query(query): Query<FiboQuery>) -> Json<ApiResponse<String>> {
         Json(ApiResponse {
             code: 0,
             resp: "ok".to_string(),
-            data: calc_fibo::calc_fibo_rec(query.n).to_string(),
+            data: fibo::calc_fibo_rec(query.n).to_string(),
         })
     }
 }
@@ -65,40 +67,52 @@ pub struct FiboQuery {
     responses(
         (status = 0, body = ApiResponse<HanoiResponse>, description = "ok"),
         (status = 1, body = ApiResponse<HanoiResponse>, description = "Input number exceeds order calculation limit (14)"),
-        (status = 2, body = ApiResponse<HanoiResponse>, description = "Thread join Error occur!")
+        (status = 2, body = ApiResponse<HanoiResponse>, description = "Input number exceeds limit (10,000,000)"),
+        (status = -1, body = ApiResponse<HanoiResponse>, description = "Thread join Error occur!")
     )
 )]
 pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiResponse>> {
+    let mut res_default = ApiResponse::<HanoiResponse>::default();
+    info!("user requests hanoi {}'th squence", query.num_cell);
     if query.num_cell < 15 {
-        match calc_hanoi::calc_hanoi_rec(query.num_cell).await {
-            Ok(res) => Json(ApiResponse {
-                code: 0,
-                resp: "ok".to_string(),
-                data: HanoiResponse {
+        res_default = match hanoi::calc_hanoi_rec(query.num_cell).await {
+            Ok(res) => res_default
+                .code(0)
+                .resp("ok".to_string())
+                .data(HanoiResponse {
                     num_replacement: res.len().to_string(),
                     orders: Some(res),
-                },
-            }),
+                }),
             Err(err) => {
                 error!("Thread join error occur!: {}", err);
-                Json(ApiResponse {
-                    code: 2,
-                    resp: "Thread join Error occur!".to_string(),
-                    data: HanoiResponse::default(),
-                })
+                res_default
+                    .code(-1)
+                    .resp("Thread join Error occur!".to_string())
             }
-        }
+        };
+    } else if query.num_cell < 10_000_000 {
+        let num_replacement = hanoi::calc_hanoi_num(query.num_cell).await;
+        res_default = match num_replacement {
+            Ok(v) => res_default
+                .code(1)
+                .resp("Input number exceeds order calculation limit (14)".to_string())
+                .data(HanoiResponse {
+                    num_replacement: v.to_string(),
+                    ..Default::default()
+                }),
+            Err(err) => {
+                error!("Thread join error occur!: {}", err);
+                res_default
+                    .code(-1)
+                    .resp("Thread join Error occur!".to_string())
+            }
+        };
     } else {
-        let num_replacement =
-            (pow(BigUint::from(2usize), query.num_cell) - BigUint::from(1usize)).to_string();
-        Json(ApiResponse {
-            code: 1,
-            resp: "Input number exceeds order calculation limit (14)".to_string(),
-            data: HanoiResponse {
-                num_replacement, ..Default::default()
-            },
-        })
+        res_default = res_default
+            .code(2)
+            .resp("Input number exceeds limit (10,000,000)".to_string());
     }
+    Json(res_default)
 }
 #[derive(Deserialize, ToSchema, IntoParams)]
 pub struct HanoiQuery {
@@ -108,59 +122,4 @@ pub struct HanoiQuery {
 pub struct HanoiResponse {
     num_replacement: String,
     orders: Option<Vec<(u8, u8)>>,
-}
-
-mod calc_fibo {
-    use lazy_static::lazy_static;
-    use num::BigUint;
-    use std::collections::HashMap;
-    use std::sync::RwLock;
-
-    lazy_static! {
-        static ref FIBO_CACHE: RwLock<HashMap<usize, BigUint>> = RwLock::new(HashMap::new());
-    }
-    pub fn calc_fibo_rec(n: usize) -> BigUint {
-        {
-            if let Some(res) = FIBO_CACHE
-                .read()
-                .ok()
-                .and_then(|cache| cache.get(&n).cloned())
-            {
-                return res;
-            }
-        }
-        if n == 0 || n == 1 {
-            BigUint::from(n)
-        } else {
-            let res = calc_fibo_rec(n - 1) + calc_fibo_rec(n - 2);
-            {
-                if let Ok(mut cache) = FIBO_CACHE.write() {
-                    cache.insert(n, res.clone());
-                }
-            }
-            res
-        }
-    }
-}
-
-mod calc_hanoi {
-    use tokio::task;
-
-    pub async fn calc_hanoi_rec(num_cell: usize) -> Result<Vec<(u8, u8)>, tokio::task::JoinError> {
-        task::spawn_blocking(move || {
-            let mut orders: Vec<(u8, u8)> = Vec::new();
-            calc_hanoi_inner_(num_cell, 1, 3, 2, &mut orders);
-            Ok(orders)
-        })
-        .await?
-    }
-    fn calc_hanoi_inner_(num_cell: usize, from: u8, to: u8, via: u8, res_vec: &mut Vec<(u8, u8)>) {
-        if num_cell == 1 {
-            res_vec.push((from, to));
-        } else {
-            calc_hanoi_inner_(num_cell - 1, from, via, to, res_vec);
-            res_vec.push((from, to));
-            calc_hanoi_inner_(num_cell - 1, via, to, from, res_vec);
-        }
-    }
 }
