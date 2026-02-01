@@ -1,6 +1,9 @@
 use axum::Router;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+
+/// # RouterExt
+/// implemets with_prefix to easily add prefix with string slice.
 pub trait RouterExt {
     fn with_prefix(self, prefix: &str) -> Self;
 }
@@ -11,17 +14,31 @@ impl RouterExt for Router {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Default, Clone)]
 pub struct ApiResponse<T>
 where
     T: ToSchema,
 {
-    pub code: u16,
+    pub code: isize,
     pub resp: String,
     pub data: T,
 }
+impl<T: ToSchema> ApiResponse<T> {
+    pub fn code(mut self, code: isize) -> Self {
+        self.code = code;
+        self
+    }
+    pub fn resp(mut self, resp: String) -> Self {
+        self.resp = resp;
+        self
+    }
+    pub fn data(mut self, data: T) -> Self {
+        self.data = data;
+        self
+    }
+}
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Default, Clone)]
 /// # Empty
 /// Describes `null` state for compiler to understand.
 /// ## How to use
