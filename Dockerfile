@@ -14,7 +14,7 @@ COPY ./Cargo.toml ./Cargo.lock ./
 RUN cargo fetch
 
 COPY .env ./
-COPY ./migration ./migration
+COPY ./migrations ./migrations
 COPY ./src ./src
 RUN cargo build --release
 
