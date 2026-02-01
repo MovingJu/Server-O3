@@ -28,7 +28,7 @@ log = "0.4.28"
 # Error handling
 thiserror = "1.0"
 anyhow = "1"
-num-bigint = "0.4.6"
 
 # Safe mutable static variable
 lazy_static = "1.5.0"
+num = "0.4.3"
