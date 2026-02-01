@@ -1,11 +1,12 @@
 //! # database
 //! module testing my database
 
-use axum::{Json, routing::get, Router, extract::Query};
-use serde::{Serialize, Deserialize};
-use utoipa::{OpenApi, ToSchema, IntoParams};
+use axum::{Json, Router, extract::{State, Query}, routing::get};
+use serde::Deserialize;
+use utoipa::{IntoParams, OpenApi, ToSchema};
+use log::error;
 
-use crate::prelude::*;
+use crate::{prelude::*, services::sql_pool::AppState};
 
 #[derive(OpenApi)]
 #[openapi(
@@ -18,9 +19,10 @@ use crate::prelude::*;
 pub struct DatabaseApi;
 /// # get_router
 /// Adds route easily in `main.rs` file.
-pub fn get_router() -> Router {
+pub fn get_router(state: std::sync::Arc<AppState>) -> Router {
     Router::new()
         .route("/get_user", get(get_user))
+        .with_state(state)
         .with_prefix("/db")
 }
 
@@ -34,14 +36,20 @@ pub fn get_router() -> Router {
         (status = 1, body = ApiResponse<String>, description = "Input number exceeds the maximum limit (5,000)")
     )
 )]
-pub async fn get_user(Query(query): Query<GetUserQuery>) -> Json<ApiResponse<String>> {
-    Json(ApiResponse {
-        code: 1,
-        resp: "Bad Request".to_string(),
-        data: query.n.to_string(),
-    })
+pub async fn get_user(
+    State(state): State<std::sync::Arc<AppState>>,
+    Query(query): Query<GetUserQuery>
+) -> Json<ApiResponse<String>> {
+    todo!();
+    // match find_user_by_key(&state, query.id).await {
+    //     Ok(v) => Json(ApiResponse { code: 0, resp: "ok".to_string(), data: v }),
+    //     Err(err) => {
+    //         error!("Error occur: {}", err);
+    //         Json(ApiResponse { code: 1, resp: format!("Error occur: {}", err), ..Default::default()})
+    //     }
+    // }
 }
 #[derive(Deserialize, ToSchema, IntoParams)]
 pub struct GetUserQuery {
-    n: usize,
+    id: usize,
 }

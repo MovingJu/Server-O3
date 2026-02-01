@@ -13,6 +13,8 @@ WORKDIR /app
 COPY ./Cargo.toml ./Cargo.lock ./
 RUN cargo fetch
 
+COPY .env ./
+COPY ./migration ./migration
 COPY ./src ./src
 RUN cargo build --release
 
