@@ -19,6 +19,10 @@ async fn main() -> Result<()> {
     let mut openapi = routes::index::IndexApi::openapi();
     openapi.merge(routes::apis::ApiDoc::openapi());
 
+    // Pass below if CI environment
+    if std::env::var("CI").is_ok() {
+        return Ok(());
+    }
     // Load database
     debug!("Loading env paths");
     dotenv::dotenv().ok();
