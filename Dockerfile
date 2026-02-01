@@ -13,7 +13,7 @@ WORKDIR /app
 COPY ./Cargo.toml ./Cargo.lock ./
 RUN cargo fetch
 
-COPY ./sqlx ./sqlx
+COPY ./.sqlx ./.sqlx
 COPY ./migrations ./migrations
 COPY ./src ./src
 RUN cargo build --release
