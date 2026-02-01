@@ -23,10 +23,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       
       - name: Build Docker image
-        run: docker build -t movingju/public:api.movingju.com .
+        run: docker build -t movingju/test:api.movingju.com .
           
       - name: Push Docker image
-        run: docker push movingju/public:api.movingju.com
+        run: docker push movingju/test:api.movingju.com
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.7.0

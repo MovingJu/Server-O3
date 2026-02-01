@@ -1,53 +1,60 @@
 use anyhow::Result;
 use axum::Router;
-use log::info;
+use log::{error, info, debug};
+use sqlx::PgPool;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod prelude;
-mod routes;
+mod repository;
 mod services;
-
-#[derive(OpenApi)]
-#[openapi(
-    info(
-        title = "movingju.com API",
-        version = "1.1.0",
-        description = "My Public APIs"
-    ),
-    nest(
-        (path = "/users", api = routes::users::UsersApi),
-        (path = "/calc", api = routes::calc::CalcApi),
-        (path = "/db", api = routes::database::DatabaseApi)
-    )
-)]
-struct ApiDoc;
+mod routes;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize logging first
+    // Initialize log level
     init_logger();
 
     // Merge all OpenAPI documents
-    let mut openapi = ApiDoc::openapi();
-    openapi.merge(routes::index::IndexApi::openapi());
+    let mut openapi = routes::index::IndexApi::openapi();
+    openapi.merge(routes::apis::ApiDoc::openapi());
+
+    // Load database
+    debug!("Loading env paths");
+    dotenv::dotenv().ok();
+    let database_url = match std::env::var("DATABASE_URL") {
+        Ok(v) => v,
+        Err(err) => {
+            error!("Fail to load DATABASE_URL from .env : {}", err);
+            panic!()
+        }
+    };
+    debug!("Complete to load DATABASE_URL");
+    let pool = PgPool::connect(&database_url).await?;
+    let state = std::sync::Arc::new(repository::RepoFactory::new(pool));
+    debug!("Succesfully connect to Database");
 
     // Build application with all routes
     let app = Router::new()
         .merge(SwaggerUi::new("/docs").url("/openapi.json", openapi))
         .merge(routes::index::get_router())
-        .merge(routes::users::get_router())
-        .merge(routes::calc::get_router())
-        .merge(routes::database::get_router());
+        .merge(routes::apis::get_router(state));
+    run_server(app).await?;
 
+    Ok(())
+}
+
+async fn run_server(app: Router) -> Result<()> {
     let listener = tokio::net::TcpListener::bind(&"0.0.0.0:8080").await?;
-
     info!("Server listening on http://0.0.0.0:8080");
-    axum::serve(listener, app)
+    match axum::serve(listener, app)
         .with_graceful_shutdown(wait_for_signal())
-        .await?;
+        .await
+    {
+        Ok(..) => (),
+        Err(err) => error!("Error occur while shutting down : {}", err),
+    };
     info!("Server closed gracefully");
-
     Ok(())
 }
 
@@ -72,10 +79,9 @@ async fn wait_for_signal() {
         use tokio::signal::unix::{SignalKind, signal};
         let mut sigterm = signal(SignalKind::terminate()).unwrap();
         let mut sigint = signal(SignalKind::interrupt()).unwrap();
-
         tokio::select! {
             _ = sigterm.recv() => info!("Received SIGTERM"),
-            _ = sigint.recv() => info!("Received SIGINT"),
+            _ = sigint.recv() => {println!(); info!("Received SIGINT")},
         }
     }
 
@@ -83,6 +89,7 @@ async fn wait_for_signal() {
     {
         use tokio::signal;
         let _ = signal::ctrl_c().await;
+        println!("-----------------");
         info!("Received Ctrl+C");
     }
 }
