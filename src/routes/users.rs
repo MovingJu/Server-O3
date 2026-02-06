@@ -1,8 +1,7 @@
 use aide::axum::{ApiRouter, routing::get};
-use axum::Json;
+use axum::{Json, extract::Query};
 use log::info;
 use schemars::JsonSchema;
-use serde::Serialize;
 
 use crate::prelude::*;
 
@@ -22,17 +21,21 @@ pub struct UserResp {
     pub email: Option<String>,
 }
 
-pub async fn get_users() -> Json<ApiResponse<UserResp>> {
+pub async fn get_users(Query(query): Query<GetUserQuery>) -> Json<ApiResponse<UserResp>> {
     info!("Request to get users table.");
     Json(ApiResponse {
         code: 200,
         resp: "ok".to_string(),
         data: UserResp {
             id: 1,
-            name: "MovingJu".to_string(),
+            name: query.name,
             email: None,
         },
     })
+}
+#[derive(Serialize, Deserialize, JsonSchema)]
+pub struct GetUserQuery {
+    name: String
 }
 
 pub async fn set_users() -> Json<ApiResponse<Empty>> {

@@ -1,7 +1,7 @@
 //! # database
 //! module testing my database
 
-use aide::axum::{ApiRouter, routing::post_with};
+use aide::axum::{ApiRouter, routing::get_with};
 use axum::{
     Json,
     extract::{Query, State},
@@ -19,15 +19,15 @@ use crate::{
 /// Adds route easily in `main.rs` file.
 pub fn get_router(state: Arc<RepoFactory>) -> ApiRouter {
     ApiRouter::new()
-        .api_route("/get_user", post_with(get_user, |op| op.tag("database")))
-        .api_route("/set_user", post_with(set_user, |op| op.tag("database")))
+        .api_route("/get_user", get_with(get_user, |op| op.tag("database")))
+        .api_route("/set_user", get_with(set_user, |op| op.tag("database")))
         .with_state(state)
         .with_prefix("/db")
 }
 
 pub async fn get_user(
     State(state): State<Arc<RepoFactory>>,
-    Json(query): Json<GetUserQuery>,
+    Query(query): Query<GetUserQuery>,
 ) -> Json<ApiResponse<Vec<Users>>> {
     let state = state.user.clone();
     let criteria = Users {
@@ -57,7 +57,7 @@ pub struct GetUserQuery {
 
 pub async fn set_user(
     State(state): State<Arc<RepoFactory>>,
-    Json(query): Json<SetUserQuery>,
+    Query(query): Query<SetUserQuery>,
 ) -> Json<ApiResponse<Empty>> {
     let row = Users {
         name: query.name,

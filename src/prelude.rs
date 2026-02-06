@@ -1,6 +1,6 @@
 pub use aide::axum::ApiRouter;
 pub use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
+pub use serde::{Deserialize, Serialize};
 pub use std::sync::Arc;
 
 /// # RouterExt
