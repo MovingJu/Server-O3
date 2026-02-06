@@ -1,4 +1,4 @@
-use aide::axum::{ApiRouter, routing::post_with};
+use aide::axum::{ApiRouter, routing::get_with};
 use axum::{Json, extract::Query};
 use log::{error, info};
 use schemars::JsonSchema;
@@ -13,13 +13,13 @@ use crate::{
 /// Adds route easily in `main.rs` file.
 pub fn get_router() -> ApiRouter {
     ApiRouter::new()
-        .api_route("/fibo", post_with(fibo, |op| op.tag("calc")))
-        .api_route("/hanoi", post_with(hanoi, |op| op.tag("calc")))
+        .api_route("/fibo", get_with(fibo, |op| op.tag("calc")))
+        .api_route("/hanoi", get_with(hanoi, |op| op.tag("calc")))
         .with_prefix("/calc")
 }
 
 /// # API for calculating n'th Fibonacci number
-pub async fn fibo(Json(query): Json<FiboQuery>) -> Json<ApiResponse<String>> {
+pub async fn fibo(Query(query): Query<FiboQuery>) -> Json<ApiResponse<String>> {
     info!("user requests fibonacci {}'th number", query.n);
     if query.n > 5_000 {
         Json(ApiResponse {
@@ -41,7 +41,7 @@ pub struct FiboQuery {
 }
 
 /// # API for calculating n'th Hanoi's tower
-pub async fn hanoi(Json(query): Json<HanoiQuery>) -> Json<ApiResponse<HanoiResponse>> {
+pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiResponse>> {
     let mut res_default = ApiResponse::<HanoiResponse>::default();
     info!("user requests hanoi {}'th squence", query.n);
     if query.n < 15 {
