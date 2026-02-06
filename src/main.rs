@@ -1,14 +1,14 @@
 use anyhow::Result;
 use axum::Router;
-use log::{error, info, debug};
+use log::{debug, error, info};
 use sqlx::PgPool;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod prelude;
 mod repository;
-mod services;
 mod routes;
+mod services;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -19,12 +19,8 @@ async fn main() -> Result<()> {
     let mut openapi = routes::index::IndexApi::openapi();
     openapi.merge(routes::apis::ApiDoc::openapi());
 
-    // Pass below if CI environment
-    if std::env::var("CI").is_ok() {
-        return Ok(());
-    }
     // Load database
-    debug!("Loading env paths");
+    debug!("Loading env variables");
     dotenv::dotenv().ok();
     let database_url = match std::env::var("DATABASE_URL") {
         Ok(v) => v,
@@ -33,7 +29,7 @@ async fn main() -> Result<()> {
             panic!()
         }
     };
-    debug!("Complete to load DATABASE_URL");
+    debug!("Complete to load variable DATABASE_URL");
     let pool = PgPool::connect(&database_url).await?;
     let state = std::sync::Arc::new(repository::RepoFactory::new(pool));
     debug!("Succesfully connect to Database");
@@ -93,7 +89,7 @@ async fn wait_for_signal() {
     {
         use tokio::signal;
         let _ = signal::ctrl_c().await;
-        println!("-----------------");
+        println!();
         info!("Received Ctrl+C");
     }
 }

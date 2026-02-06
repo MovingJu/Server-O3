@@ -1,29 +1,30 @@
 pub mod users;
-pub mod post;
-pub mod comment;
+pub mod posts;
+// pub mod comment;
 
 use serde::Serialize;
-use sqlx::PgPool;
+use sqlx::{Error, PgPool};
 use utoipa::ToSchema;
 
-pub trait Repo {
+#[async_trait::async_trait]
+pub trait Repo<T: Table> {
     fn new(pool: PgPool) -> Self;
+    async fn select(&self, criteria: &T) -> Result<Vec<T>, Error>;
+    async fn insert(&self, row: &T) -> Result<(), Error>;
 }
-pub trait Table: ToSchema + Serialize {
-
-}
+pub trait Table: ToSchema + Serialize + Sized {}
 
 #[derive(Clone)]
 pub struct RepoFactory {
     pub user: users::UsersRepo,
-    // pub post: post::PostRepo,
+    pub posts: posts::PostsRepo,
     // pub comment: comment::CommentRepo
 }
 impl RepoFactory {
     pub fn new(pool: PgPool) -> Self {
         Self {
             user: users::UsersRepo::new(pool.clone()),
-            // post: post::PostRepo::new(pool.clone()),
+            posts: posts::PostsRepo::new(pool.clone()),
             // comment: comment::CommentRepo::new(pool.clone())
         }
     }

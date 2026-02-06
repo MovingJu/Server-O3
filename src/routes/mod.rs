@@ -6,9 +6,9 @@ pub mod users;
 pub mod apis {
     use axum::Router;
     use utoipa::OpenApi;
-    
-    use crate::{repository::RepoFactory, services::sql_pool::AppState};
+
     use super::*;
+    use crate::repository::RepoFactory;
 
     #[derive(OpenApi)]
     #[openapi(
