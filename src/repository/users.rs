@@ -1,6 +1,6 @@
+use schemars::JsonSchema;
 use serde::Serialize;
 use sqlx::{Error, FromRow, PgPool};
-use utoipa::ToSchema;
 
 use super::{Repo, Table};
 
@@ -28,7 +28,7 @@ impl Repo<Users> for UsersRepo {
     }
 }
 
-#[derive(FromRow, ToSchema, Serialize, Default)]
+#[derive(FromRow, JsonSchema, Serialize, Default)]
 pub struct Users {
     pub id: i64,
     pub name: String,

@@ -1,6 +1,6 @@
 [package]
 name = "api_movingju_com"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2024"
 
 [[bin]]
@@ -14,12 +14,14 @@ tokio = { version = "1.36.0", features = ["full"] }
 async-trait = "0.1.89"
 
 # Async Server
-axum = "0.7.4"
-serde = {version = "1.0.196", features = ["derive"]}
+axum = "0.8.1"
+serde = {version = "1.0.196", features = ["derive", "rc"]}
 serde_json = "1.0.145"
-utoipa = {version = "5", features = ["axum_extras", "openapi_extensions", "macros"]}
-utoipa-swagger-ui = { version = "8", features = ["axum"] }
 sqlx = { version = "0.8", features = [ "runtime-tokio-native-tls", "postgres" ] }
+
+# Generates OpenAPI doc
+aide = { version = "0.16.0-alpha.2", features = ["redoc", "swagger", "scalar", "axum-json"] }
+schemars = { version = "1.0.4"}
 
 # Logging & Reading env files
 dotenv = "0.15"

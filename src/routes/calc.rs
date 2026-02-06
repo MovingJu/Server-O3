@@ -1,43 +1,26 @@
-use axum::{Json, Router, extract::Query, routing::get};
+use aide::axum::{ApiRouter, routing::post_with};
+use axum::{Json, extract::Query};
 use log::{error, info};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::{
     prelude::*,
     services::{fibo, hanoi},
 };
 
-#[derive(OpenApi)]
-#[openapi(
-    paths(fibo, hanoi),
-    tags((
-        name = "calc",
-        description = "APIs for custom calculation."
-    ))
-)]
-pub struct CalcApi;
 /// # get_router
 /// Adds route easily in `main.rs` file.
-pub fn get_router() -> Router {
-    Router::new()
-        .route("/fibo", get(fibo))
-        .route("/hanoi", get(hanoi))
+pub fn get_router() -> ApiRouter {
+    ApiRouter::new()
+        .api_route("/fibo", post_with(fibo, |op| op.tag("calc")))
+        .api_route("/hanoi", post_with(hanoi, |op| op.tag("calc")))
         .with_prefix("/calc")
 }
 
 /// # API for calculating n'th Fibonacci number
-#[utoipa::path(
-    get,
-    tag = "calc",
-    path = "/fibo",
-    params(FiboQuery),
-    responses(
-        (status = 0, body = ApiResponse<String>, description = "Calculates Nth fibonacci number."),
-        (status = 1, body = ApiResponse<String>, description = "Input number exceeds the maximum limit (5,000)")
-    )
-)]
-pub async fn fibo(Query(query): Query<FiboQuery>) -> Json<ApiResponse<String>> {
+pub async fn fibo(Json(query): Json<FiboQuery>) -> Json<ApiResponse<String>> {
+    info!("user requests fibonacci {}'th number", query.n);
     if query.n > 5_000 {
         Json(ApiResponse {
             code: 1,
@@ -45,7 +28,6 @@ pub async fn fibo(Query(query): Query<FiboQuery>) -> Json<ApiResponse<String>> {
             data: "The number is too big! (>5,000)".to_string(),
         })
     } else {
-        info!("user requests fibonacci {}'th number", query.n);
         Json(ApiResponse {
             code: 0,
             resp: "ok".to_string(),
@@ -53,25 +35,13 @@ pub async fn fibo(Query(query): Query<FiboQuery>) -> Json<ApiResponse<String>> {
         })
     }
 }
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, JsonSchema)]
 pub struct FiboQuery {
     n: usize,
 }
 
 /// # API for calculating n'th Hanoi's tower
-#[utoipa::path(
-    get,
-    tag = "calc",
-    path = "/hanoi",
-    params(HanoiQuery),
-    responses(
-        (status = 0, body = ApiResponse<HanoiResponse>, description = "ok"),
-        (status = 1, body = ApiResponse<HanoiResponse>, description = "Input number exceeds order calculation limit (14)"),
-        (status = 2, body = ApiResponse<HanoiResponse>, description = "Input number exceeds limit (10,000,000)"),
-        (status = -1, body = ApiResponse<HanoiResponse>, description = "Thread join Error occur!")
-    )
-)]
-pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiResponse>> {
+pub async fn hanoi(Json(query): Json<HanoiQuery>) -> Json<ApiResponse<HanoiResponse>> {
     let mut res_default = ApiResponse::<HanoiResponse>::default();
     info!("user requests hanoi {}'th squence", query.n);
     if query.n < 15 {
@@ -114,11 +84,11 @@ pub async fn hanoi(Query(query): Query<HanoiQuery>) -> Json<ApiResponse<HanoiRes
     }
     Json(res_default)
 }
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, JsonSchema)]
 pub struct HanoiQuery {
     n: usize,
 }
-#[derive(Serialize, ToSchema, Default)]
+#[derive(Serialize, JsonSchema, Default)]
 pub struct HanoiResponse {
     num_replacement: String,
     orders: Option<Vec<(u8, u8)>>,

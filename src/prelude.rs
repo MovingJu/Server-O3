@@ -1,29 +1,29 @@
-use axum::Router;
+pub use aide::axum::ApiRouter;
+pub use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
+pub use std::sync::Arc;
 
 /// # RouterExt
 /// implemets with_prefix to easily add prefix with string slice.
 pub trait RouterExt {
     fn with_prefix(self, prefix: &str) -> Self;
 }
-
-impl RouterExt for Router {
+impl RouterExt for ApiRouter {
     fn with_prefix(self, prefix: &str) -> Self {
-        Router::new().nest(prefix, self)
+        ApiRouter::new().nest(prefix, self)
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Default, Clone)]
+#[derive(Serialize, Deserialize, JsonSchema, Default, Clone)]
 pub struct ApiResponse<T>
 where
-    T: ToSchema,
+    T: JsonSchema,
 {
     pub code: isize,
     pub resp: String,
     pub data: T,
 }
-impl<T: ToSchema> ApiResponse<T> {
+impl<T: JsonSchema> ApiResponse<T> {
     pub fn code(mut self, code: isize) -> Self {
         self.code = code;
         self
@@ -38,7 +38,7 @@ impl<T: ToSchema> ApiResponse<T> {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Default, Clone)]
+#[derive(Serialize, Deserialize, JsonSchema, Default, Clone)]
 /// # Empty
 /// Describes `null` state for compiler to understand.
 /// ## How to use

@@ -1,10 +1,10 @@
-pub mod users;
 pub mod posts;
+pub mod users;
 // pub mod comment;
 
+use schemars::JsonSchema;
 use serde::Serialize;
 use sqlx::{Error, PgPool};
-use utoipa::ToSchema;
 
 #[async_trait::async_trait]
 pub trait Repo<T: Table> {
@@ -12,7 +12,7 @@ pub trait Repo<T: Table> {
     async fn select(&self, criteria: &T) -> Result<Vec<T>, Error>;
     async fn insert(&self, row: &T) -> Result<(), Error>;
 }
-pub trait Table: ToSchema + Serialize + Sized {}
+pub trait Table: JsonSchema + Serialize + Sized {}
 
 #[derive(Clone)]
 pub struct RepoFactory {

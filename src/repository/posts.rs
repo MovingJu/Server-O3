@@ -1,6 +1,6 @@
+use schemars::JsonSchema;
 use serde::Serialize;
-use sqlx::{PgPool, Error, FromRow};
-use utoipa::ToSchema;
+use sqlx::{Error, FromRow, PgPool};
 
 use super::{Repo, Table};
 
@@ -26,16 +26,16 @@ impl Repo<Posts> for PostsRepo {
             .await?;
         Ok(vec![res])
     }
-    async fn insert(&self, row: &Posts) -> Result<(), Error> {
+    async fn insert(&self, _row: &Posts) -> Result<(), Error> {
         todo!();
     }
 }
 
-#[derive(FromRow, Serialize, ToSchema, Default)]
+#[derive(FromRow, Serialize, JsonSchema, Default)]
 pub struct Posts {
     pub id: i64,
     pub title: String,
     pub content: String,
-    pub user_id: i64
+    pub user_id: i64,
 }
 impl Table for Posts {}

@@ -1,57 +1,33 @@
 //! # database
 //! module testing my database
 
+use aide::axum::{ApiRouter, routing::post_with};
 use axum::{
-    Json, Router,
+    Json,
     extract::{Query, State},
-    routing::{get, post},
 };
 use log::error;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use utoipa::{IntoParams, OpenApi, ToSchema};
 
 use crate::{
     prelude::*,
-    repository::{
-        Repo, 
-        RepoFactory, 
-        users::Users,
-        posts::Posts
-    },
+    repository::{Repo, RepoFactory, posts::Posts, users::Users},
 };
 
-#[derive(OpenApi)]
-#[openapi(
-    paths(get_user, set_user, get_post),
-    tags((
-        name = "database",
-        description = "APIs for testings database."
-    ))
-)]
-pub struct DatabaseApi;
 /// # get_router
 /// Adds route easily in `main.rs` file.
-pub fn get_router(state: std::sync::Arc<RepoFactory>) -> Router {
-    Router::new()
-        .route("/get_user", get(get_user))
-        .route("/set_user", post(set_user))
+pub fn get_router(state: Arc<RepoFactory>) -> ApiRouter {
+    ApiRouter::new()
+        .api_route("/get_user", post_with(get_user, |op| op.tag("database")))
+        .api_route("/set_user", post_with(set_user, |op| op.tag("database")))
         .with_state(state)
         .with_prefix("/db")
 }
 
-#[utoipa::path(
-    get,
-    tag = "database",
-    path = "/get_user",
-    params(GetUserQuery),
-    responses(
-        (status = 0, body = ApiResponse<Vec<Users>>, description = "ok"),
-        (status = 1, body = ApiResponse<Vec<Users>>, description = "Error occur: {err.what()}")
-    )
-)]
 pub async fn get_user(
-    State(state): State<std::sync::Arc<RepoFactory>>,
-    Query(query): Query<GetUserQuery>,
+    State(state): State<Arc<RepoFactory>>,
+    Json(query): Json<GetUserQuery>,
 ) -> Json<ApiResponse<Vec<Users>>> {
     let state = state.user.clone();
     let criteria = Users {
@@ -74,24 +50,14 @@ pub async fn get_user(
         }
     }
 }
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, JsonSchema)]
 pub struct GetUserQuery {
     name: String,
 }
 
-#[utoipa::path(
-    post,
-    tag = "database",
-    path = "/set_user",
-    params(SetUserQuery),
-    responses(
-        (status = 0, body = ApiResponse<Empty>, description = "ok"),
-        (status = 1, body = ApiResponse<Empty>, description = "Error occur: {err.what()}")
-    )
-)]
 pub async fn set_user(
-    State(state): State<std::sync::Arc<RepoFactory>>,
-    Query(query): Query<SetUserQuery>,
+    State(state): State<Arc<RepoFactory>>,
+    Json(query): Json<SetUserQuery>,
 ) -> Json<ApiResponse<Empty>> {
     let row = Users {
         name: query.name,
@@ -110,24 +76,14 @@ pub async fn set_user(
         }),
     }
 }
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, JsonSchema)]
 pub struct SetUserQuery {
     name: String,
 }
 
-#[utoipa::path(
-    post,
-    tag = "database",
-    path = "/get_post",
-    params(GetPostQuery),
-    responses(
-        (status = 0, body = ApiResponse<Empty>, description = "ok"),
-        (status = 1, body = ApiResponse<Empty>, description = "Error occur: {err.what()}")
-    )
-)]
 pub async fn get_post(
     State(state): State<std::sync::Arc<RepoFactory>>,
-    Query(query): Query<SetUserQuery>,
+    Query(_query): Query<SetUserQuery>,
 ) -> Json<ApiResponse<Empty>> {
     let row = Posts {
         ..Default::default()
@@ -145,15 +101,15 @@ pub async fn get_post(
         }),
     }
 }
-#[derive(Deserialize, ToSchema, IntoParams)]
+#[derive(Deserialize, JsonSchema)]
 pub struct GetPostQuery {
     user_id: i64,
-    title: Option<String>
+    title: Option<String>,
 }
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, JsonSchema)]
 pub struct GetPostResponse {
     id: i64,
     title: String,
     content: String,
-    user_id: i64
+    user_id: i64,
 }
