@@ -1,0 +1,40 @@
+[package]
+name = "api_movingju_com"
+version = "1.2.0"
+edition = "2024"
+
+[[bin]]
+name = "api_movingju_com"
+path = "src/main.rs"
+
+[dependencies]
+# Async Runtime
+tokio = { version = "1.36.0", features = ["full"] }
+# tokio-util = { version = "0.7.16", features = ["io"] }
+async-trait = "0.1.89"
+
+# Async Server
+axum = "0.8.1"
+serde = {version = "1.0.196", features = ["derive", "rc"]}
+serde_json = "1.0.145"
+sqlx = { version = "0.8", features = [ "runtime-tokio-native-tls", "postgres" ] }
+
+# Generates OpenAPI doc
+aide = { version = "0.16.0-alpha.2", features = ["redoc", "swagger", "scalar", "axum-json", "axum-query"] }
+schemars = { version = "1.0.4"}
+
+# Logging & Reading env files
+dotenv = "0.15"
+env_logger = "0.11.8"
+log = "0.4.28"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1"
+
+# Safe mutable static variable
+lazy_static = "1.5.0"
+num = "0.4.3"
+
+# Static linking in Alpine Container
+openssl = { version = "0.10", features = ["vendored"] }
