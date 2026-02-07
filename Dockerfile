@@ -12,6 +12,7 @@ RUN apk add --no-cache \
     && update-ca-certificates
 WORKDIR /app
 
+COPY Cargo.toml Cargo.lock ./
 COPY ./.sqlx ./.sqlx
 COPY ./migrations ./migrations
 COPY ./crates ./crates
