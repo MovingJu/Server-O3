@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub mod posts;
 pub mod users;
 // pub mod comment;

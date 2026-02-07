@@ -1,7 +1,9 @@
+#![allow(dead_code)]
+
 //! # database
 //! module testing my database
 
-use aide::axum::{ApiRouter, routing::get_with};
+use aide::axum::{ApiRouter, routing::get};
 use axum::{
     Json,
     extract::{Query, State},
@@ -15,14 +17,20 @@ use crate::{
     repository::{Repo, RepoFactory, posts::Posts, users::Users},
 };
 
-/// # get_router
-/// Adds route easily in `main.rs` file.
-pub fn get_router(state: Arc<RepoFactory>) -> ApiRouter {
-    ApiRouter::new()
-        .api_route("/get_user", get_with(get_user, |op| op.tag("database")))
-        .api_route("/set_user", get_with(set_user, |op| op.tag("database")))
-        .with_state(state)
-        .with_prefix("/db")
+pub fn get_router(state: Arc<RepoFactory>) -> (Option<Tag>, ApiRouter) {
+    (
+        Some(Tag {
+            name: "database".to_string(),
+            description: Some("APIs for manipulating database".to_string()),
+            ..Default::default()
+        }),
+        ApiRouter::new()
+            .api_route("/get_user", get(get_user))
+            .api_route("/set_user", get(set_user))
+            .with_state(state)
+            .with_prefix("/db")
+            .with_tag("database"),
+    )
 }
 
 pub async fn get_user(

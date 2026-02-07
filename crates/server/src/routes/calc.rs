@@ -11,11 +11,18 @@ use crate::{
 
 /// # get_router
 /// Adds route easily in `main.rs` file.
-pub fn get_router() -> ApiRouter {
-    ApiRouter::new()
-        .api_route("/fibo", get_with(fibo, |op| op.tag("calc")))
-        .api_route("/hanoi", get_with(hanoi, |op| op.tag("calc")))
-        .with_prefix("/calc")
+pub fn get_router() -> (Option<Tag>, ApiRouter) {
+    (
+        Some(Tag {
+            name: "calc".to_string(),
+            description: Some("API for custom calculations".to_string()),
+            ..Default::default()
+        }),
+        ApiRouter::new()
+            .api_route("/fibo", get_with(fibo, |op| op.tag("calc")))
+            .api_route("/hanoi", get_with(hanoi, |op| op.tag("calc")))
+            .with_prefix("/calc"),
+    )
 }
 
 /// # API for calculating n'th Fibonacci number

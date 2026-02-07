@@ -1,16 +1,18 @@
-pub use aide::axum::ApiRouter;
+pub use aide::{axum::ApiRouter, openapi::Tag};
 pub use schemars::JsonSchema;
 pub use serde::{Deserialize, Serialize};
 pub use std::sync::Arc;
 
-/// # RouterExt
-/// implemets with_prefix to easily add prefix with string slice.
 pub trait RouterExt {
-    fn with_prefix(self, prefix: &str) -> Self;
+    fn with_prefix(self, prefix: &'static str) -> Self;
+    fn with_tag(self, tag_name: &'static str) -> Self;
 }
 impl RouterExt for ApiRouter {
-    fn with_prefix(self, prefix: &str) -> Self {
-        ApiRouter::new().nest(prefix, self)
+    fn with_prefix(self, prefix: &'static str) -> Self {
+        ApiRouter::new().nest_api_service(prefix, self)
+    }
+    fn with_tag(self, tag_name: &'static str) -> Self {
+        self.with_path_items(|op| op.tag(tag_name))
     }
 }
 
