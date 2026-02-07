@@ -117,6 +117,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "api_routes"
+version = "0.1.0"
+dependencies = [
+ "aide",
+ "axum",
+ "schemars",
+]
+
+[[package]]
 name = "async-trait"
 version = "0.1.89"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1485,10 +1494,6 @@ dependencies = [
  "subtle",
  "zeroize",
 ]
-
-[[package]]
-name = "rustapi"
-version = "0.1.0"
 
 [[package]]
 name = "rustix"

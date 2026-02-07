@@ -38,3 +38,6 @@ num = "0.4.3"
 
 # Static linking in Alpine Container
 openssl = { version = "0.10", features = ["vendored"] }
+
+# Routes crate
+# api_routes = { path = "../api_routes"}

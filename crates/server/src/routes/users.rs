@@ -7,18 +7,18 @@ use crate::prelude::*;
 
 /// # get_router
 /// Adds route easily in `main.rs` file.
-pub fn get_router() -> (ApiRouter, Option<Tag>) {
+pub fn get_router() -> (Option<Tag>, ApiRouter) {
     (
-        ApiRouter::new()
-            .api_route("/get_users", get(get_users))
-            .api_route("/set_users", get(set_users))
-            .with_prefix("/users")
-            .with_tag("test"),
         Some(Tag {
             name: "test".to_string(),
             description: Some("testing routes".to_string()),
             ..Default::default()
         }),
+        ApiRouter::new()
+            .api_route("/get_users", get(get_users))
+            .api_route("/set_users", get(set_users))
+            .with_prefix("/users")
+            .with_tag("test"),
     )
 }
 

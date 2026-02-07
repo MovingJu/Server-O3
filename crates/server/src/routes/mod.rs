@@ -3,33 +3,45 @@ pub mod database;
 pub mod index;
 pub mod users;
 
+
 pub mod apis {
-    use aide::swagger::Swagger;
-    use aide::transform::TransformOpenApi;
-    use aide::{
-        axum::{
-            ApiRouter, IntoApiResponse,
-            routing::{get, get_with},
-        },
-        openapi::OpenApi,
-        redoc::Redoc,
-        scalar::Scalar,
-    };
-    use axum::{Extension, Json, response::IntoResponse};
+    use aide::{axum::ApiRouter, openapi::OpenApi};
     use std::sync::Arc;
 
-    use super::*;
-    use crate::repository::RepoFactory;
-
-    pub fn route_settings(state: std::sync::Arc<RepoFactory>) -> (ApiRouter, TransformOpenApi) {
-        (vec![
+    pub fn route_settings(state: Arc<RepoFactory>) -> (ApiRouter, OpenApi) {
+        [
+            // Add routes here
+            index::get_router(),
             calc::get_router(),
             database::get_router(state),
             users::get_router(),
         ]
         .into_iter()
-        .fold((ApiRouter::new(), TransformOpenApi::new(&mut OpenApi::default())), |(app, api), route| (app.merge(route.0), api.tag(route.1.unwrap_or_default()))))
+        .fold(
+            (ApiRouter::new(), OpenApi::default()),
+            |(app, mut api), route| {
+                match route.0 {
+                    Some(v) => api.tags.push(v),
+                    None => (),
+                };
+                (app.merge(route.1), api)
+            },
+        )
     }
+
+    use aide::swagger::Swagger;
+    use aide::{
+        axum::{
+            IntoApiResponse,
+            routing::{get, get_with},
+        },
+        redoc::Redoc,
+        scalar::Scalar,
+    };
+    use axum::{Extension, Json, response::IntoResponse};
+
+    use super::*;
+    use crate::repository::RepoFactory;
 
     pub fn docs_routes(state: Arc<RepoFactory>) -> ApiRouter {
         // We infer the return types for these routes

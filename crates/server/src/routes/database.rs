@@ -17,19 +17,19 @@ use crate::{
     repository::{Repo, RepoFactory, posts::Posts, users::Users},
 };
 
-pub fn get_router(state: Arc<RepoFactory>) -> (ApiRouter, Option<Tag>) {
+pub fn get_router(state: Arc<RepoFactory>) -> (Option<Tag>, ApiRouter) {
     (
+        Some(Tag {
+            name: "database".to_string(),
+            description: Some("APIs for manipulating database".to_string()),
+            ..Default::default()
+        }),
         ApiRouter::new()
             .api_route("/get_user", get(get_user))
             .api_route("/set_user", get(set_user))
             .with_state(state)
             .with_prefix("/db")
             .with_tag("database"),
-        Some(Tag {
-            name: "database".to_string(),
-            description: Some("APIs for manipulating database".to_string()),
-            ..Default::default()
-        }),
     )
 }
 

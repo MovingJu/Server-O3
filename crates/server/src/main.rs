@@ -1,6 +1,6 @@
 use aide::{
     axum::{IntoApiResponse, routing::get},
-    openapi::{OpenApi, Tag},
+    openapi::OpenApi,
     transform::TransformOpenApi,
 };
 use anyhow::Result;
@@ -12,8 +12,8 @@ use prelude::*;
 
 mod prelude;
 mod repository;
-mod routes;
 mod services;
+mod routes;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -35,11 +35,9 @@ async fn main() -> Result<()> {
     let state = Arc::new(repository::RepoFactory::new(pool));
     debug!("Succesfully connect to Database");
 
-    let api = OpenApi::default();
     // Build application with all routes
-    let app = ApiRouter::new()
-        .merge(routes::index::get_router())
-        .merge(routes::apis::get_router(state.clone()))
+    let (app, api) = routes::apis::route_settings(state.clone());
+    let app = app
         .nest_api_service("/docs", routes::apis::docs_routes(state.clone()))
         .route("/full_api.json", get(serve_api));
     run_server(app, api).await?;
@@ -69,16 +67,6 @@ async fn run_server(app: ApiRouter, mut api: OpenApi) -> Result<()> {
 fn api_docs(api: TransformOpenApi) -> TransformOpenApi {
     api.title("api.movingju.com")
         .summary("My public APIs")
-        .tag(Tag {
-            name: "calc".to_string(),
-            description: Some("Custom calculation modules".into()),
-            ..Default::default()
-        })
-        .tag(Tag {
-            name: "database".to_string(),
-            description: Some("Database manipulation modules".to_string()),
-            ..Default::default()
-        })
         .security_scheme(
             "ApiKey",
             aide::openapi::SecurityScheme::ApiKey {

@@ -8,11 +8,19 @@ use log::info;
 
 /// # get_router
 /// Adds route easily in `main.rs` file.
-pub fn get_router() -> ApiRouter {
-    ApiRouter::new()
-        .api_route("/", get(index))
-        .api_route("/test", get(test))
-        .api_route("/is_alive", get(is_alive))
+pub fn get_router() -> (Option<Tag>, ApiRouter) {
+    (
+        Some(Tag {
+            name: "Index".to_string(),
+            description: Some("Default features".to_string()),
+            ..Default::default()
+        }),
+        ApiRouter::new()
+            .api_route("/", get(index))
+            .api_route("/test", get(test))
+            .api_route("/is_alive", get(is_alive))
+            .with_tag("Index"),
+    )
 }
 
 /// index
