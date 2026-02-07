@@ -12,12 +12,9 @@ RUN apk add --no-cache \
     && update-ca-certificates
 WORKDIR /app
 
-COPY ./Cargo.toml ./Cargo.lock ./
-RUN cargo fetch
-
 COPY ./.sqlx ./.sqlx
 COPY ./migrations ./migrations
-COPY ./src ./src
+COPY ./crates ./crates
 RUN cargo build --release
 
 FROM alpine:3.23
