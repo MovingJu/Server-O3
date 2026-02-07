@@ -1,0 +1,9 @@
+[package]
+name = "api_routes"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = "0.8.1"
+aide = { version = "0.16.0-alpha.2", features = ["redoc", "swagger", "scalar", "axum-json", "axum-query"] }
+schemars = { version = "1.0.4"}
