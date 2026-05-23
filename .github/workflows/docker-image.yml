@@ -22,8 +22,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image
-        run: docker build -t movingju/public:api.movingju.com .
+        run: docker buildx build --platform=linux/arm64 -t movingju/public:api.movingju.com --load .
           
       - name: Push Docker image
         run: docker push movingju/public:api.movingju.com
