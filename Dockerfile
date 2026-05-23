@@ -16,7 +16,7 @@ COPY Cargo.toml Cargo.lock ./
 COPY ./.sqlx ./.sqlx
 COPY ./migrations ./migrations
 COPY ./crates ./crates
-RUN cargo build --release
+RUN SQLX_OFFLINE=true cargo build --release
 
 FROM alpine:3.23
 WORKDIR /app
