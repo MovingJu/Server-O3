@@ -4,9 +4,10 @@ use aide::{
     transform::TransformOpenApi,
 };
 use anyhow::Result;
-use axum::{Extension, Json};
+use axum::{Extension, Json, http::{HeaderValue, Method}};
 use log::{debug, error, info};
 use sqlx::PgPool;
+use tower_http::cors::CorsLayer;
 
 use prelude::*;
 
@@ -36,10 +37,19 @@ async fn main() -> Result<()> {
     debug!("Succesfully connect to Database");
 
     // Build application with all routes
+    let cors = CorsLayer::new()
+        .allow_origin(tower_http::cors::AllowOrigin::list([
+            "https://movingju.com".parse::<HeaderValue>().unwrap(),
+            "http://localhost:4000".parse::<HeaderValue>().unwrap(),
+        ]))
+        .allow_methods([Method::GET, Method::POST])
+        .allow_headers(tower_http::cors::Any);
+
     let (app, api) = routes::apis::route_settings(state.clone());
     let app = app
         .nest_api_service("/docs", routes::apis::docs_routes(state.clone()))
-        .route("/full_api.json", get(serve_api));
+        .route("/full_api.json", get(serve_api))
+        .layer(cors);
     run_server(app, api).await?;
 
     Ok(())

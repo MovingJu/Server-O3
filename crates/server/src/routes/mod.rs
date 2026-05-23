@@ -1,6 +1,9 @@
+pub mod auth;
 pub mod calc;
+pub mod comment;
 pub mod database;
 pub mod index;
+pub mod reaction;
 pub mod users;
 
 
@@ -13,8 +16,11 @@ pub mod apis {
             // Add routes here
             index::get_router(),
             calc::get_router(),
-            database::get_router(state),
+            database::get_router(state.clone()),
             users::get_router(),
+            auth::get_router(state.clone()),
+            comment::get_router(state.clone()),
+            reaction::get_router(state),
         ]
         .into_iter()
         .fold(

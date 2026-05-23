@@ -36,6 +36,13 @@ anyhow = "1"
 lazy_static = "1.5.0"
 num = "0.4.3"
 
+# Auth
+jsonwebtoken = "9"
+bcrypt = "0.15"
+
+# CORS
+tower-http = { version = "0.6", features = ["cors"] }
+
 # Static linking in Alpine Container
 openssl = { version = "0.10", features = ["vendored"] }
 
